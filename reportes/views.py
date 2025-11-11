@@ -100,7 +100,9 @@ def reporte_ventas_csv(request):
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="reporte_ventas.csv"'
-    writer = csv.writer(response)
+    # BOM para Excel + delimitador ';' y CRLF
+    response.write('\ufeff')
+    writer = csv.writer(response, delimiter=';', lineterminator='\r\n')
     writer.writerow(['numero', 'fecha', 'cliente', 'producto', 'cantidad', 'precio_unitario', 'subtotal', 'estado'])
     # Una fila por ítem
     items = PedidoVentaItem.objects.filter(pedido__in=qs).select_related('pedido', 'producto', 'pedido__cliente')
@@ -138,7 +140,8 @@ def reporte_compras_csv(request):
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="reporte_compras.csv"'
-    writer = csv.writer(response)
+    response.write('\ufeff')
+    writer = csv.writer(response, delimiter=';', lineterminator='\r\n')
     writer.writerow(['numero', 'fecha', 'proveedor', 'producto', 'cantidad', 'costo_unitario', 'subtotal', 'estado'])
     items = OrdenCompraItem.objects.filter(orden__in=qs).select_related('orden', 'producto', 'orden__proveedor')
     if producto_id:
@@ -172,7 +175,16 @@ def reporte_inventario_csv(request):
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="reporte_inventario.csv"'
-    response.write('codigo,nombre,categoria,proveedor,stock,precio_venta\n')
+    response.write('\ufeff')
+    writer = csv.writer(response, delimiter=';', lineterminator='\r\n')
+    writer.writerow(['codigo', 'nombre', 'categoria', 'proveedor', 'stock', 'precio_venta'])
     for p in qs:
-        response.write(f'{p.codigo},{p.nombre},{p.categoria.nombre},{p.proveedor.empresa},{p.cantidad_en_inventario},{p.precio_venta}\n')
+        writer.writerow([
+            p.codigo,
+            p.nombre,
+            p.categoria.nombre,
+            p.proveedor.empresa,
+            p.cantidad_en_inventario,
+            p.precio_venta,
+        ])
     return response
