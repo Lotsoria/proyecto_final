@@ -6,7 +6,7 @@ Pasos rápidos:
 
    - Establece `DATABASE_URL` (ejemplo):
 
-     `DATABASE_URL=mysql://root:Shadowdemon456.@localhost:3306/erp`
+     `DATABASE_URL=mysql://root:password@localhost:3306/erp`
 
    - Requiere driver MySQL para Django:
      - Opción A: `mysqlclient`
