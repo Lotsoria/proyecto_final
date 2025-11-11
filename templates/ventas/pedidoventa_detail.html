@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Detalle Venta{% endblock %}
+{% block content %}
+<h3>Venta {{ object.numero }}</h3>
+<p><strong>Fecha:</strong> {{ object.fecha }} | <strong>Cliente:</strong> {{ object.cliente }}</p>
+<p><strong>Estado:</strong> {{ object.estado }}</p>
+<div class="mb-3">
+  {% if object.estado == 'pendiente' %}
+    <a class="btn btn-outline-secondary" href="/ventas/pedidos/{{ object.id }}/editar/">Editar</a>
+    <form method="post" action="/ventas/pedidos/{{ object.id }}/completar/" style="display:inline;">
+      {% csrf_token %}
+      <button class="btn btn-success" type="submit">Completar venta</button>
+    </form>
+  {% endif %}
+  <a class="btn btn-secondary" href="/ventas/pedidos/">Volver</a>
+  </div>
+<table class="table table-sm">
+  <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+  <tbody>
+    {% for item in object.items.all %}
+      <tr>
+        <td>{{ item.producto }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td>{{ item.precio_unitario }}</td>
+        <td>{{ item.subtotal }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><th colspan="3" class="text-end">Total</th><th>{{ object.total }}</th></tr>
+  </tfoot>
+</table>
+{% endblock %}

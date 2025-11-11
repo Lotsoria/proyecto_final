@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Órdenes de Compra{% endblock %}
+{% block content %}
+<h3>Órdenes de Compra</h3>
+<table class="table table-striped">
+  <thead><tr><th>Número</th><th>Fecha</th><th>Proveedor</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+    {% for obj in object_list %}
+      <tr>
+        <td>{{ obj.numero }}</td>
+        <td>{{ obj.fecha }}</td>
+        <td>{{ obj.proveedor }}</td>
+        <td>{{ obj.total }}</td>
+        <td>{{ obj.estado }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="/compras/ordenes/{{ obj.id }}/">Ver</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

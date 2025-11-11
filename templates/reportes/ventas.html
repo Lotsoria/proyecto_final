@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Reporte de Ventas{% endblock %}
+{% block content %}
+<h3>Reporte de Ventas</h3>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto"><input type="date" name="desde" value="{{ request.GET.desde }}" class="form-control" placeholder="Desde"></div>
+  <div class="col-auto"><input type="date" name="hasta" value="{{ request.GET.hasta }}" class="form-control" placeholder="Hasta"></div>
+  <div class="col-auto">
+    <select name="cliente" class="form-select">
+      <option value="">-- Cliente --</option>
+      {% for c in clientes %}
+      <option value="{{ c.id }}" {% if request.GET.cliente == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre_completo }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="producto" class="form-select">
+      <option value="">-- Producto --</option>
+      {% for p in productos %}
+      <option value="{{ p.id }}" {% if request.GET.producto == p.id|stringformat:'s' %}selected{% endif %}>{{ p.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-primary">Filtrar</button></div>
+  <div class="col-auto"><a class="btn btn-outline-secondary" href="/reportes/ventas.csv?{{ request.GET.urlencode }}">Exportar CSV</a></div>
+</form>
+<table class="table table-striped">
+  <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+  <tbody>
+    {% for v in pedidos %}
+    <tr>
+      <td>{{ v.numero }}</td>
+      <td>{{ v.fecha }}</td>
+      <td>{{ v.cliente }}</td>
+      <td>{{ v.total }}</td>
+      <td>{{ v.estado }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

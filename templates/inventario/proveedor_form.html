@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Proveedor{% endblock %}
+{% block content %}
+<h3>Proveedor</h3>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="/inventario/proveedores/">Cancelar</a>
+</form>
+{% endblock %}
+

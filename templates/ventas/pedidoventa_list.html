@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Pedidos de Venta{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Pedidos de Venta</h3>
+  <a class="btn btn-primary" href="/ventas/pedidos/nuevo/">Nueva venta</a>
+  </div>
+<table class="table table-striped">
+  <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+    {% for obj in object_list %}
+      <tr>
+        <td>{{ obj.numero }}</td>
+        <td>{{ obj.fecha }}</td>
+        <td>{{ obj.cliente }}</td>
+        <td>{{ obj.total }}</td>
+        <td>{{ obj.estado }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="/ventas/pedidos/{{ obj.id }}/">Ver</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

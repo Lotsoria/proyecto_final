@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Clientes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Clientes</h3>
+  <a class="btn btn-primary" href="/ventas/clientes/nuevo/">Nuevo</a>
+  </div>
+<table class="table table-striped">
+  <thead><tr><th>Nombre</th><th>Teléfono</th><th>Email</th><th></th></tr></thead>
+  <tbody>
+    {% for obj in object_list %}
+      <tr>
+        <td>{{ obj.nombre_completo }}</td>
+        <td>{{ obj.telefono }}</td>
+        <td>{{ obj.email }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="/ventas/clientes/{{ obj.id }}/editar/">Editar</a>
+          <a class="btn btn-sm btn-outline-danger" href="/ventas/clientes/{{ obj.id }}/eliminar/">Eliminar</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
