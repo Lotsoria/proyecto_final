@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}{% if crear %}Nueva Orden de Compra{% else %}Editar Orden{% endif %}{% endblock %}
+{% block content %}
+<h3>{% if crear %}Nueva Orden de Compra{% else %}Editar OC {{ orden.numero }}{% endif %}</h3>
+<form method="post">
+  {% csrf_token %}
+  <div class="card mb-3">
+    <div class="card-body">
+      {{ form.as_p }}
+    </div>
+  </div>
+
+  <h5>Productos</h5>
+  {{ formset.management_form }}
+  <table class="table table-sm align-middle" id="items-table">
+    <thead>
+    <tr><th>Producto</th><th>Cantidad</th><th>Costo unitario</th><th>Eliminar</th></tr></thead>
+    <tbody>
+    {% for f in formset %}
+      <tr class="item-row">
+        <td>{{ f.producto }}</td>
+        <td style="width:160px;">{{ f.cantidad }}</td>
+        <td style="width:200px;">{{ f.costo_unitario }}</td>
+        <td style="width:140px;">
+          {% if f.DELETE %}{{ f.DELETE }}{% endif %}
+          <button class="btn btn-sm btn-outline-danger remove-line" type="button">Quitar</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <button class="btn btn-outline-primary mb-3" id="add-line" type="button">Agregar producto</button>
+  <button class="btn btn-primary" type="submit">Guardar</button>
+  <a class="btn btn-secondary" href="/compras/ordenes/">Cancelar</a>
+</form>
+{% block extra_js %}
+<script>
+  const PRICE_MAP = {{ price_map_json|safe }};
+
+  function findTotalFormsInput() { return document.querySelector('input[name$="-TOTAL_FORMS"]'); }
+
+  function updatePriceForRow(row) {
+    const select = row.querySelector('select');
+    const priceInput = row.querySelector('input[name$="-costo_unitario"]');
+    if (select && priceInput) {
+      const pid = select.value;
+      if (PRICE_MAP && PRICE_MAP[pid]) priceInput.value = PRICE_MAP[pid];
+    }
+  }
+
+  function preventDuplicates() {
+    const selects = Array.from(document.querySelectorAll('#items-table select'));
+    const seen = new Set();
+    for (const s of selects) {
+      if (!s.value) continue;
+      if (seen.has(s.value)) {
+        alert('No puedes repetir el mismo producto en la orden.');
+        s.value = '';
+        s.dispatchEvent(new Event('change'));
+        return false;
+      }
+      seen.add(s.value);
+    }
+    return true;
+  }
+
+  function bindRow(row) {
+    const select = row.querySelector('select');
+    if (select) {
+      select.addEventListener('change', function () { updatePriceForRow(row); preventDuplicates(); });
+    }
+    const removeBtn = row.querySelector('.remove-line');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function() {
+        const totalForms = findTotalFormsInput();
+        row.remove();
+        const rows = document.querySelectorAll('#items-table tbody tr.item-row');
+        totalForms.value = rows.length;
+        renumberForms(rows);
+      });
+    }
+  }
+
+  function renumberForms(rows) {
+    let i = 0;
+    rows.forEach(r => {
+      r.querySelectorAll('input, select').forEach(el => {
+        el.name = el.name.replace(/-(\d+)-/, `-${i}-`);
+        el.id = el.id.replace(/_(\d+)_/, `_${i}_`);
+      });
+      i++;
+    });
+  }
+
+  document.querySelectorAll('#items-table tbody tr.item-row').forEach(row => { bindRow(row); updatePriceForRow(row); });
+
+  document.getElementById('add-line').addEventListener('click', function() {
+    const tbody = document.querySelector('#items-table tbody');
+    const totalForms = findTotalFormsInput();
+    const formIdx = parseInt(totalForms.value, 10);
+    const template = document.querySelector('#items-table tbody tr.item-row');
+    if (!template) return;
+    const newRow = template.cloneNode(true);
+    newRow.querySelectorAll('input').forEach(inp => { if (inp.type === 'number' || inp.type === 'text') inp.value = ''; });
+    newRow.querySelectorAll('select').forEach(sel => { sel.value = ''; });
+    newRow.querySelectorAll('input, select').forEach(el => {
+      el.name = el.name.replace(/-(\d+)-/, `-${formIdx}-`);
+      el.id = el.id.replace(/_(\d+)_/, `_${formIdx}_`);
+    });
+    tbody.appendChild(newRow);
+    totalForms.value = formIdx + 1;
+    bindRow(newRow);
+  });
+</script>
+{% endblock %}
+{% endblock %}
+

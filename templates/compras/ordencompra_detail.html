@@ -4,6 +4,16 @@
 <h3>OC {{ object.numero }}</h3>
 <p><strong>Fecha:</strong> {{ object.fecha }} | <strong>Proveedor:</strong> {{ object.proveedor }}</p>
 <p><strong>Estado:</strong> {{ object.estado }}</p>
+<div class="mb-3">
+  {% if object.estado == 'pendiente' %}
+    <a class="btn btn-outline-secondary" href="/compras/ordenes/{{ object.id }}/editar/">Editar</a>
+    <form method="post" action="/compras/ordenes/{{ object.id }}/recibir/" style="display:inline;">
+      {% csrf_token %}
+      <button class="btn btn-success" type="submit">Marcar recibida</button>
+    </form>
+  {% endif %}
+  <a class="btn btn-secondary" href="/compras/ordenes/">Volver</a>
+  </div>
 <table class="table table-sm">
   <thead><tr><th>Producto</th><th>Cantidad</th><th>Costo</th><th>Subtotal</th></tr></thead>
   <tbody>
@@ -21,4 +31,3 @@
   </tfoot>
 </table>
 {% endblock %}
-
