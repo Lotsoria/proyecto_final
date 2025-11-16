@@ -1,3 +1,9 @@
+"""Rutas de Ventas.
+
+- Clientes: listado y CRUD
+- Pedidos de venta: listado, detalle, crear, editar, completar
+"""
+
 from django.urls import path
 from . import views
 

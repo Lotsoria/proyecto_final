@@ -1,3 +1,10 @@
+"""Rutas de Inventario.
+
+- Categorías CRUD
+- Proveedores CRUD
+- Productos CRUD
+"""
+
 from django.urls import path
 from . import views
 
@@ -17,4 +24,3 @@ urlpatterns = [
     path('productos/<int:pk>/editar/', views.ProductoUpdateView.as_view(), name='producto_update'),
     path('productos/<int:pk>/eliminar/', views.ProductoDeleteView.as_view(), name='producto_delete'),
 ]
-

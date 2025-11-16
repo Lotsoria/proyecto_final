@@ -1,3 +1,15 @@
+"""Modelos de ventas.
+
+- Cliente: datos de clientes
+- PedidoVenta: cabecera de venta, controla transiciones de estado
+- PedidoVentaItem: detalle (producto, cantidad, precio)
+
+Reglas de negocio principales:
+- No se puede cambiar el estado una vez completado/cancelado
+- Al completar una venta se crean movimientos de inventario de salida
+  (esto descuenta stock mediante la lógica de MovimientoInventario)
+"""
+
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -6,6 +18,7 @@ from inventario.models import Producto
 
 
 class Cliente(models.Model):
+    """Cliente de la empresa."""
     nombre_completo = models.CharField(max_length=150)
     direccion = models.CharField(max_length=255)
     telefono = models.CharField(max_length=30)
@@ -16,6 +29,12 @@ class Cliente(models.Model):
 
 
 class PedidoVenta(models.Model):
+    """Cabecera de pedido de venta.
+
+    - estado: pendiente|completado|cancelado
+    - total: calculado a partir de los ítems
+    - completar(): valida stock y crea movimientos de salida
+    """
     ESTADOS = [
         ('pendiente', 'Pendiente'),
         ('completado', 'Completado'),
@@ -58,6 +77,7 @@ class PedidoVenta(models.Model):
             )
 
     def save(self, *args, **kwargs):
+        # Al pasar a 'completado' se generan movimientos de salida.
         is_new = self.pk is None
         old_estado = None
         if not is_new:
@@ -70,6 +90,7 @@ class PedidoVenta(models.Model):
 
 
 class PedidoVentaItem(models.Model):
+    """Detalle de la venta: producto, cantidad y precio unitario."""
     pedido = models.ForeignKey(PedidoVenta, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField()
@@ -81,4 +102,3 @@ class PedidoVentaItem(models.Model):
 
     def __str__(self):
         return f"{self.producto} x {self.cantidad}"
-

@@ -1,3 +1,9 @@
+"""Formularios del módulo de ventas.
+
+- PedidoVentaForm: datos principales del pedido
+- PedidoVentaItemFormSet: ítems con validaciones (sin duplicados, cantidades/precios positivos)
+"""
+
 from django import forms
 from django.forms import inlineformset_factory, BaseInlineFormSet
 
@@ -5,6 +11,10 @@ from .models import PedidoVenta, PedidoVentaItem
 
 
 class PedidoVentaForm(forms.ModelForm):
+    """Formulario principal del pedido de venta.
+
+    Se capturan número y cliente. El estado se controla en la vista/modelo.
+    """
     class Meta:
         model = PedidoVenta
         fields = [
@@ -13,6 +23,12 @@ class PedidoVentaForm(forms.ModelForm):
 
 
 class BasePedidoVentaItemFormSet(BaseInlineFormSet):
+    """Validaciones a nivel de formset para ítems de venta.
+
+    - Un producto por fila (obligatorio)
+    - Cantidad y precio > 0
+    - No permitir productos repetidos en la misma venta
+    """
     def clean(self):
         super().clean()
         productos = []
@@ -20,6 +36,7 @@ class BasePedidoVentaItemFormSet(BaseInlineFormSet):
             if not hasattr(form, 'cleaned_data'):
                 continue
             if form.cleaned_data.get('DELETE'):
+                print('entro delete')
                 continue
             producto = form.cleaned_data.get('producto')
             cantidad = form.cleaned_data.get('cantidad')

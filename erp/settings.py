@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Apps del proyecto
+    'api.apps.ApiConfig',
     'cuentas.apps.CuentasConfig',
     'inventario.apps.InventarioConfig',
     'ventas.apps.VentasConfig',
@@ -53,7 +54,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'erp.wsgi.application'
 
-# Configuración directa de MySQL con las credenciales proporcionadas
+# Base de datos (MySQL) con credenciales proporcionadas
+# Nota: en producción usar variables de entorno para mayor seguridad
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -80,12 +82,14 @@ TIME_ZONE = os.environ.get('TZ', 'America/Mexico_City')
 USE_I18N = True
 USE_TZ = True
 
+# Archivos estáticos
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Autenticación
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'

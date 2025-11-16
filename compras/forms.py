@@ -1,3 +1,9 @@
+"""Formularios del módulo de compras.
+
+- OrdenCompraForm: datos principales de la orden
+- OrdenCompraItemFormSet: ítems con validaciones (sin duplicados, cantidades/costos positivos)
+"""
+
 from django import forms
 from django.forms import inlineformset_factory, BaseInlineFormSet
 
@@ -5,6 +11,7 @@ from .models import OrdenCompra, OrdenCompraItem
 
 
 class OrdenCompraForm(forms.ModelForm):
+    """Formulario principal de orden de compra."""
     class Meta:
         model = OrdenCompra
         fields = [
@@ -13,6 +20,7 @@ class OrdenCompraForm(forms.ModelForm):
 
 
 class BaseOrdenCompraItemFormSet(BaseInlineFormSet):
+    """Validaciones a nivel de formset para ítems de orden de compra."""
     def clean(self):
         super().clean()
         productos = []
@@ -45,4 +53,3 @@ OrdenCompraItemFormSet = inlineformset_factory(
     validate_min=True,
     formset=BaseOrdenCompraItemFormSet,
 )
-

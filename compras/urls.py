@@ -1,3 +1,8 @@
+"""Rutas de Compras.
+
+- Órdenes de compra: listado, detalle, crear, editar, recibir
+"""
+
 from django.urls import path
 from . import views
 
