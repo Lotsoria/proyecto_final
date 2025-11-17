@@ -1,11 +1,138 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="row g-3">
-  <div class="col-md-12">
-    <h3>Bienvenido</h3>
-    <p>Usa el menú superior para navegar por los módulos.</p>
+<div class="row g-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div>
+        <h2 class="fw-semibold mb-1">Resumen general</h2>
+        <p class="text-muted mb-0">Estado rápido de ventas e inventario actualizado al día de hoy.</p>
+      </div>
+      <a class="btn btn-primary" href="/ventas/pedidos/nuevo/">Crear venta</a>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Ventas hoy</p>
+        <h4 class="fw-semibold mb-0">${{ total_hoy|floatformat:2 }}</h4>
+        <p class="small text-success mb-0">Movimientos del día</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Ventas mes</p>
+        <h4 class="fw-semibold mb-0">${{ total_mes|floatformat:2 }}</h4>
+        <p class="small text-muted mb-0">{{ ventas_mes_count }} ventas registradas</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Total completado</p>
+        <h4 class="fw-semibold mb-0">${{ total_completado|floatformat:2 }}</h4>
+        <p class="small text-muted mb-0">Histórico de ventas cerradas</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <p class="text-muted mb-1">Pendientes</p>
+        <h4 class="fw-semibold mb-0">{{ ventas_pendientes }} ventas · {{ compras_pendientes }} compras</h4>
+        <p class="small text-muted mb-0">Órdenes abiertas en proceso</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0">Top productos vendidos</h5>
+          <a class="small" href="/reportes/ventas/">Ver reportes</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Producto</th><th>Código</th><th class="text-end">Unidades</th><th class="text-end">Monto</th></tr></thead>
+            <tbody>
+              {% for p in top_productos %}
+                <tr>
+                  <td class="fw-semibold">{{ p.producto__nombre }}</td>
+                  <td>{{ p.producto__codigo }}</td>
+                  <td class="text-end">{{ p.unidades }}</td>
+                  <td class="text-end">${{ p.monto|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4"><div class="empty-state">Aún no hay ventas completadas.</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h5 class="mb-0">Inventario</h5>
+            <p class="text-muted small mb-0">Stock total: {{ stock_total }}</p>
+          </div>
+          <a class="small" href="/inventario/productos/">Ver todo</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Producto</th><th class="text-end">Stock</th></tr></thead>
+            <tbody>
+              {% for prod in stock_bajo %}
+                <tr>
+                  <td class="fw-semibold">{{ prod.nombre }}</td>
+                  <td class="text-end">{% if prod.cantidad_en_inventario <= 0 %}<span class="text-danger">{{ prod.cantidad_en_inventario }}</span>{% else %}{{ prod.cantidad_en_inventario }}{% endif %}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="2"><div class="empty-state">No hay productos con stock bajo.</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0">Últimas ventas registradas</h5>
+          <a class="small" href="/ventas/pedidos/">Ir a ventas</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Número</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="text-end">Monto</th></tr></thead>
+            <tbody>
+              {% for v in ultimas_ventas %}
+                <tr>
+                  <td class="fw-semibold">{{ v.numero }}</td>
+                  <td>{{ v.cliente }}</td>
+                  <td>{{ v.fecha }}</td>
+                  <td><span class="badge text-bg-light border">{{ v.estado }}</span></td>
+                  <td class="text-end">${{ v.monto|default:0|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5"><div class="empty-state">Aún no hay ventas registradas.</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
-
