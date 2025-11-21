@@ -14,6 +14,7 @@ from . import views
 urlpatterns = [
     path('login/', views.api_login, name='api_login'),
     path('logout/', views.api_logout, name='api_logout'),
+    path('dashboard/', views.dashboard_metrics, name='api_dashboard'),
 
     path('clientes/', views.clientes_list_create, name='api_clientes'),
     path('clientes/<int:pk>/', views.cliente_detail_update_delete, name='api_cliente_detail'),
