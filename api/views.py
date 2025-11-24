@@ -407,12 +407,13 @@ def ventas_list_create(request):
             payload = json.loads(request.body or '{}')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON inválido'}, status=400)
-        numero = payload.get('numero')
         cliente_id = payload.get('cliente_id')
         items = payload.get('items', [])
-        if not numero or not cliente_id or not items:
-            return JsonResponse({'error': 'numero, cliente_id e items son obligatorios'}, status=400)
-        v = PedidoVenta.objects.create(numero=numero, cliente_id=cliente_id, estado='pendiente')
+        if not cliente_id or not items:
+            return JsonResponse({'error': 'cliente_id e items son obligatorios'}, status=400)
+        numero = payload.get('numero') or None
+        v = PedidoVenta(numero=numero, cliente_id=cliente_id, estado='pendiente')
+        v.save()
         for it in items:
             pid = it.get('producto_id')
             cant = int(it.get('cantidad', 0) or 0)
@@ -521,12 +522,13 @@ def compras_list_create(request):
             payload = json.loads(request.body or '{}')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON inválido'}, status=400)
-        numero = payload.get('numero')
         proveedor_id = payload.get('proveedor_id')
         items = payload.get('items', [])
-        if not numero or not proveedor_id or not items:
-            return JsonResponse({'error': 'numero, proveedor_id e items son obligatorios'}, status=400)
-        o = OrdenCompra.objects.create(numero=numero, proveedor_id=proveedor_id, estado='pendiente')
+        if not proveedor_id or not items:
+            return JsonResponse({'error': 'proveedor_id e items son obligatorios'}, status=400)
+        numero = payload.get('numero') or None
+        o = OrdenCompra(numero=numero, proveedor_id=proveedor_id, estado='pendiente')
+        o.save()
         for it in items:
             pid = it.get('producto_id')
             cant = int(it.get('cantidad', 0) or 0)

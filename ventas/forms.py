@@ -18,7 +18,7 @@ class PedidoVentaForm(forms.ModelForm):
     class Meta:
         model = PedidoVenta
         fields = [
-            'numero', 'cliente',
+            'cliente',
         ]
 
 

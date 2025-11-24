@@ -10,6 +10,7 @@ Reglas de negocio principales:
   (esto descuenta stock mediante la lógica de MovimientoInventario)
 """
 
+import re
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -49,6 +50,19 @@ class PedidoVenta(models.Model):
     def __str__(self):
         return f"Venta {self.numero}"
 
+    @classmethod
+    def generar_numero(cls) -> str:
+        """Genera un número incremental con prefijo V-."""
+        prefijo = "V-"
+        with transaction.atomic():
+            ultimo = cls.objects.select_for_update().order_by('-id').first()
+            ultimo_num = 0
+            if ultimo and ultimo.numero:
+                match = re.search(r'(\d+)$', ultimo.numero)
+                if match:
+                    ultimo_num = int(match.group(1))
+            return f"{prefijo}{ultimo_num + 1:04d}"
+
     @property
     def total(self) -> Decimal:
         return sum((i.subtotal for i in self.items.all()), Decimal('0.00'))
@@ -80,6 +94,11 @@ class PedidoVenta(models.Model):
         # Al pasar a 'completado' se generan movimientos de salida.
         is_new = self.pk is None
         old_estado = None
+        if is_new and not self.numero:
+            with transaction.atomic():
+                self.numero = self.generar_numero()
+                super().save(*args, **kwargs)
+            return
         if not is_new:
             old_estado = PedidoVenta.objects.get(pk=self.pk).estado
         super().save(*args, **kwargs)

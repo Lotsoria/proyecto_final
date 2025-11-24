@@ -63,6 +63,7 @@ Base URL: `/api/` (autenticación por sesión). Primero inicia sesión para obte
   }
   ```
   Si no envías `precio_unitario`, usa `precio_venta` del producto.
+  Si omites `numero`, se genera automáticamente con prefijo `V-`.
 - `GET /api/ventas/{id}/`
 - `PUT|PATCH /api/ventas/{id}/` – solo si está `pendiente`; puedes enviar `numero`, `cliente_id`, y/o `items` (se reemplazan).
 - `DELETE /api/ventas/{id}/` – solo si está `pendiente`.
@@ -80,6 +81,7 @@ Base URL: `/api/` (autenticación por sesión). Primero inicia sesión para obte
     ]
   }
   ```
+- Si omites `numero`, se genera automáticamente con prefijo `OC-`.
 - `GET /api/compras/{id}/`
 - `PUT|PATCH /api/compras/{id}/` – solo si está `pendiente`; los `items` se reemplazan si los envías.
 - `DELETE /api/compras/{id}/` – solo si está `pendiente`.

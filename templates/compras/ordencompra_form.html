@@ -6,6 +6,11 @@
   {% csrf_token %}
   <div class="card mb-3">
     <div class="card-body">
+      {% if crear %}
+        <p class="text-muted small mb-2">El número de orden se asignará automáticamente al guardar.</p>
+      {% else %}
+        <p class="text-muted small mb-2">Número: <strong>{{ orden.numero }}</strong></p>
+      {% endif %}
       {{ form.as_p }}
     </div>
   </div>
@@ -22,7 +27,7 @@
         <td style="width:160px;">{{ f.cantidad }}</td>
         <td style="width:200px;">{{ f.costo_unitario }}</td>
         <td style="width:140px;">
-          {% if f.DELETE %}{{ f.DELETE }}{% endif %}
+          {% if f.DELETE %}<span class="d-none delete-field">{{ f.DELETE }}</span>{% endif %}
           <button class="btn btn-sm btn-outline-danger remove-line" type="button">Quitar</button>
         </td>
       </tr>
@@ -114,4 +119,3 @@
 </script>
 {% endblock %}
 {% endblock %}
-
