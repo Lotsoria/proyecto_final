@@ -15,7 +15,7 @@ class OrdenCompraForm(forms.ModelForm):
     class Meta:
         model = OrdenCompra
         fields = [
-            'numero', 'proveedor',
+            'proveedor',
         ]
 
 

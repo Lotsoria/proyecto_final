@@ -1,38 +1,58 @@
 {% extends 'base.html' %}
 {% block title %}{% if crear %}Nueva Venta{% else %}Editar Venta{% endif %}{% endblock %}
 {% block content %}
-<h3>{% if crear %}Nueva Venta{% else %}Editar Venta {{ pedido.numero }}{% endif %}</h3>
-<form method="post">
+<div class="section-header mb-3">
+  <div>
+    <h3 class="fw-semibold mb-1">{% if crear %}Nueva Venta{% else %}Editar Venta {{ pedido.numero }}{% endif %}</h3>
+    <p class="text-muted mb-0">Completa los datos del pedido y los productos vendidos.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-secondary" href="/ventas/pedidos/">Cancelar</a>
+    <button class="btn btn-primary" type="submit" form="venta-form">Guardar</button>
+  </div>
+  </div>
+<form id="venta-form" method="post">
   {% csrf_token %}
   <div class="card mb-3">
     <div class="card-body">
+      {% if crear %}
+        <p class="text-muted small mb-2">El número de venta se asignará automáticamente al guardar.</p>
+      {% else %}
+        <p class="text-muted small mb-2">Número: <strong>{{ pedido.numero }}</strong></p>
+      {% endif %}
       {{ form.as_p }}
     </div>
   </div>
 
-  <h5>Productos</h5>
-  {{ formset.management_form }}
-  <table class="table table-sm align-middle" id="items-table">
-    <thead>
-    <tr><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Eliminar</th></tr>
-    </thead>
-    <tbody>
-    {% for f in formset %}
-      <tr class="item-row">
-        <td>{{ f.producto }}</td>
-        <td style="width:160px;">{{ f.cantidad }}</td>
-        <td style="width:200px;">{{ f.precio_unitario }}</td>
-        <td style="width:140px;">
-          {% if f.DELETE %}{{ f.DELETE }}{% endif %}
-          <button class="btn btn-sm btn-outline-danger remove-line" type="button">Quitar</button>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <button class="btn btn-outline-primary mb-3" id="add-line" type="button">Agregar producto</button>
-  <button class="btn btn-primary" type="submit">Guardar</button>
-  <a class="btn btn-secondary" href="/ventas/pedidos/">Cancelar</a>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0">Productos</h5>
+        <button class="btn btn-outline-primary btn-sm" id="add-line" type="button">Agregar producto</button>
+      </div>
+      {{ formset.management_form }}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0" id="items-table">
+          <thead>
+          <tr><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Eliminar</th></tr>
+          </thead>
+          <tbody>
+          {% for f in formset %}
+            <tr class="item-row">
+              <td>{{ f.producto }}</td>
+              <td style="width:160px;">{{ f.cantidad }}</td>
+              <td style="width:200px;">{{ f.precio_unitario }}</td>
+              <td style="width:140px;">
+                {% if f.DELETE %}<span class="d-none delete-field">{{ f.DELETE }}</span>{% endif %}
+                <button class="btn btn-sm btn-outline-danger remove-line" type="button">Quitar</button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </form>
 {% block extra_js %}
 <script>
@@ -80,6 +100,14 @@
     const removeBtn = row.querySelector('.remove-line');
     if (removeBtn) {
       removeBtn.addEventListener('click', function() {
+        const deleteField = row.querySelector('input[name$="-DELETE"]');
+        const idField = row.querySelector('input[name$="-id"]');
+        if (deleteField && idField && idField.value) {
+          // Registro existente: marcar para eliminar y ocultar fila.
+          deleteField.checked = true;
+          row.style.display = 'none';
+          return;
+        }
         const totalForms = findTotalFormsInput();
         row.remove();
         const rows = document.querySelectorAll('#items-table tbody tr.item-row');

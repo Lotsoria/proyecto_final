@@ -13,6 +13,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, F, DecimalField
+from django.utils import timezone
 
 from ventas.models import Cliente, PedidoVenta, PedidoVentaItem
 from compras.models import OrdenCompra, OrdenCompraItem
@@ -21,6 +23,79 @@ from inventario.models import Producto, Proveedor, CategoriaProducto, Movimiento
 
 def _require_method(request, methods):
     return None if request.method in methods else HttpResponseNotAllowed(methods)
+
+
+@csrf_exempt
+def dashboard_metrics(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Auth requerido'}, status=401)
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
+
+    today = timezone.localdate()
+    start_month = today.replace(day=1)
+
+    ventas_qs = PedidoVenta.objects.all()
+    ventas_completadas = ventas_qs.filter(estado='completado')
+    ventas_pendientes = ventas_qs.filter(estado='pendiente').count()
+
+    ventas_hoy = ventas_completadas.filter(fecha=today)
+    ventas_mes = ventas_completadas.filter(fecha__gte=start_month, fecha__lte=today)
+
+    def total_items(qs):
+        return (
+            PedidoVentaItem.objects.filter(pedido__in=qs)
+            .aggregate(total=Sum(F('cantidad') * F('precio_unitario'), output_field=DecimalField(max_digits=12, decimal_places=2)))
+            .get('total')
+            or Decimal('0.00')
+        )
+
+    total_hoy = total_items(ventas_hoy)
+    total_mes = total_items(ventas_mes)
+    total_completado = total_items(ventas_completadas)
+
+    top_productos = list(
+        PedidoVentaItem.objects.filter(pedido__estado='completado')
+        .values('producto__nombre', 'producto__codigo')
+        .annotate(
+            unidades=Sum('cantidad'),
+            monto=Sum(F('cantidad') * F('precio_unitario'), output_field=DecimalField(max_digits=12, decimal_places=2)),
+        )
+        .order_by('-unidades')[:5]
+    )
+
+    stock_bajo = list(
+        Producto.objects.filter(cantidad_en_inventario__lte=5)
+        .order_by('cantidad_en_inventario')
+        .values('id', 'nombre', 'cantidad_en_inventario')[:5]
+    )
+    stock_total = Producto.objects.aggregate(total=Sum('cantidad_en_inventario'))['total'] or 0
+    compras_pendientes = OrdenCompra.objects.filter(estado='pendiente').count()
+
+    ultimas_ventas = list(
+        ventas_qs.select_related('cliente')
+        .annotate(
+            monto=Sum(
+                F('items__cantidad') * F('items__precio_unitario'),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        )
+        .order_by('-fecha')[:5]
+        .values('id', 'numero', 'cliente__nombre_completo', 'fecha', 'estado', 'monto')
+    )
+
+    return JsonResponse({
+        'total_hoy': str(total_hoy),
+        'total_mes': str(total_mes),
+        'total_completado': str(total_completado),
+        'ventas_mes_count': ventas_mes.count(),
+        'ventas_pendientes': ventas_pendientes,
+        'compras_pendientes': compras_pendientes,
+        'top_productos': top_productos,
+        'stock_bajo': stock_bajo,
+        'stock_total': stock_total,
+        'ultimas_ventas': ultimas_ventas,
+    })
 
 
 @csrf_exempt
@@ -332,12 +407,13 @@ def ventas_list_create(request):
             payload = json.loads(request.body or '{}')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON inválido'}, status=400)
-        numero = payload.get('numero')
         cliente_id = payload.get('cliente_id')
         items = payload.get('items', [])
-        if not numero or not cliente_id or not items:
-            return JsonResponse({'error': 'numero, cliente_id e items son obligatorios'}, status=400)
-        v = PedidoVenta.objects.create(numero=numero, cliente_id=cliente_id, estado='pendiente')
+        if not cliente_id or not items:
+            return JsonResponse({'error': 'cliente_id e items son obligatorios'}, status=400)
+        numero = payload.get('numero') or None
+        v = PedidoVenta(numero=numero, cliente_id=cliente_id, estado='pendiente')
+        v.save()
         for it in items:
             pid = it.get('producto_id')
             cant = int(it.get('cantidad', 0) or 0)
@@ -446,12 +522,13 @@ def compras_list_create(request):
             payload = json.loads(request.body or '{}')
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON inválido'}, status=400)
-        numero = payload.get('numero')
         proveedor_id = payload.get('proveedor_id')
         items = payload.get('items', [])
-        if not numero or not proveedor_id or not items:
-            return JsonResponse({'error': 'numero, proveedor_id e items son obligatorios'}, status=400)
-        o = OrdenCompra.objects.create(numero=numero, proveedor_id=proveedor_id, estado='pendiente')
+        if not proveedor_id or not items:
+            return JsonResponse({'error': 'proveedor_id e items son obligatorios'}, status=400)
+        numero = payload.get('numero') or None
+        o = OrdenCompra(numero=numero, proveedor_id=proveedor_id, estado='pendiente')
+        o.save()
         for it in items:
             pid = it.get('producto_id')
             cant = int(it.get('cantidad', 0) or 0)

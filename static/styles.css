@@ -1,0 +1,97 @@
+:root {
+  --erp-primary: #2563eb;
+  --erp-secondary: #1d4ed8;
+  --erp-surface: #f5f7fb;
+  --erp-border: #e5e7eb;
+}
+
+body {
+  background: var(--erp-surface);
+}
+
+main {
+  margin-top: 72px;
+}
+
+.card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--erp-border);
+}
+
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+
+.table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  color: #4b5563;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: #f9fafb;
+}
+
+.navbar {
+  background: linear-gradient(90deg, var(--erp-primary), var(--erp-secondary));
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.btn-outline-primary {
+  border-color: var(--erp-primary);
+  color: var(--erp-primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--erp-primary);
+  color: #fff;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.55rem;
+  border-color: var(--erp-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--erp-primary);
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.empty-state {
+  padding: 1.25rem;
+  border: 1px dashed var(--erp-border);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #6b7280;
+  text-align: center;
+}
