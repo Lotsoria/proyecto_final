@@ -1,3 +1,10 @@
+"""Señales para crear grupos y permisos por rol.
+
+La señal post_migrate se ejecuta tras aplicar migraciones. Esperamos a que
+existan los ContentTypes de nuestras apps antes de asignar permisos para evitar
+errores en la primera corrida.
+"""
+
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_migrate

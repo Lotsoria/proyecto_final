@@ -1,3 +1,11 @@
+"""Vistas de reportes (HTML + CSV).
+
+Filtros por querystring en HTML y exportación CSV compatible con Excel.
+- Ventas: filtra por fecha, cliente y producto; CSV por ítem
+- Compras: filtra por fecha, proveedor y producto; CSV por ítem
+- Inventario: filtra por categoría y stock mínimo
+"""
+
 from datetime import datetime
 import csv
 from django.contrib.auth.decorators import login_required

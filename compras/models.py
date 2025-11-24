@@ -1,3 +1,9 @@
+"""Modelos de compras.
+
+- OrdenCompra: cabecera; al marcar como 'recibida' genera entradas de inventario
+- OrdenCompraItem: detalle (producto, cantidad, costo)
+"""
+
 from decimal import Decimal
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
@@ -6,6 +12,12 @@ from inventario.models import Proveedor, Producto
 
 
 class OrdenCompra(models.Model):
+    """Cabecera de orden de compra.
+
+    - estado: pendiente|recibida|cancelada
+    - total: calculado a partir de los ítems
+    - recibir(): crea movimientos de inventario de entrada
+    """
     ESTADOS = [
         ('pendiente', 'Pendiente'),
         ('recibida', 'Recibida'),
@@ -43,6 +55,7 @@ class OrdenCompra(models.Model):
                 raise ValidationError('No se puede cambiar el estado una vez recibida o cancelada')
 
     def save(self, *args, **kwargs):
+        # Al pasar a 'recibida' se generan movimientos de entrada.
         is_new = self.pk is None
         old_estado = None
         if not is_new:
@@ -54,6 +67,7 @@ class OrdenCompra(models.Model):
 
 
 class OrdenCompraItem(models.Model):
+    """Detalle de orden de compra: producto, cantidad y costo unitario."""
     orden = models.ForeignKey(OrdenCompra, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField()
@@ -65,4 +79,3 @@ class OrdenCompraItem(models.Model):
 
     def __str__(self):
         return f"{self.producto} x {self.cantidad}"
-

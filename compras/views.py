@@ -91,3 +91,14 @@ def orden_compra_recibir(request, pk: int):
             messages.error(request, f'No se pudo recibir: {e}')
         return redirect('orden_compra_detail', pk=orden.pk)
     return redirect('orden_compra_detail', pk=orden.pk)
+"""
+Vistas del módulo de compras.
+
+- Listado y detalle de órdenes de compra (CBV)
+- Crear/editar órdenes con formset de ítems
+- Recibir orden (genera movimientos de inventario de entrada)
+
+Permisos:
+- Crear: compras.add_ordencompra
+- Editar/Recibir: compras.change_ordencompra
+"""

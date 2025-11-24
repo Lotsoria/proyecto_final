@@ -12,11 +12,13 @@ from .forms import PedidoVentaForm, PedidoVentaItemFormSet
 
 
 class ClienteListView(LoginRequiredMixin, ListView):
+    """Lista de clientes con paginación."""
     model = Cliente
     paginate_by = 20
 
 
 class ClienteCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Crear cliente. Requiere permiso add_cliente."""
     permission_required = 'ventas.add_cliente'
     model = Cliente
     fields = ['nombre_completo', 'direccion', 'telefono', 'email']
@@ -24,6 +26,7 @@ class ClienteCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
 
 
 class ClienteUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """Editar cliente. Requiere permiso change_cliente."""
     permission_required = 'ventas.change_cliente'
     model = Cliente
     fields = ['nombre_completo', 'direccion', 'telefono', 'email']
@@ -31,23 +34,32 @@ class ClienteUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
 
 
 class ClienteDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Eliminar cliente. Requiere permiso delete_cliente."""
     permission_required = 'ventas.delete_cliente'
     model = Cliente
     success_url = reverse_lazy('cliente_list')
 
 
 class PedidoVentaListView(LoginRequiredMixin, ListView):
+    """Listado de pedidos de venta."""
     model = PedidoVenta
     paginate_by = 20
 
 
 class PedidoVentaDetailView(LoginRequiredMixin, DetailView):
+    """Detalle de un pedido de venta con sus ítems."""
     model = PedidoVenta
 
 
 @login_required
 @permission_required('ventas.add_pedidoventa', raise_exception=True)
 def pedido_venta_create(request):
+    """Pantalla para crear una venta con ítems.
+
+    - Estado inicial: pendiente
+    - Formset: permite múltiples productos, valida duplicados y cantidades
+    - El precio se autocompleta en la UI con el precio_venta del producto
+    """
     pedido = PedidoVenta()
     if request.method == 'POST':
         form = PedidoVentaForm(request.POST, instance=pedido)
@@ -76,6 +88,10 @@ def pedido_venta_create(request):
 @login_required
 @permission_required('ventas.change_pedidoventa', raise_exception=True)
 def pedido_venta_update(request, pk: int):
+    """Editar una venta pendiente.
+
+    Solo se permite editar cuando el pedido está en estado 'pendiente'.
+    """
     pedido = PedidoVenta.objects.get(pk=pk)
     if pedido.estado != 'pendiente':
         messages.error(request, 'Solo se pueden editar ventas en estado pendiente.')
@@ -105,6 +121,12 @@ def pedido_venta_update(request, pk: int):
 @login_required
 @permission_required('ventas.change_pedidoventa', raise_exception=True)
 def pedido_venta_completar(request, pk: int):
+    """Marcar una venta como completada.
+
+    - Cambia estado a 'completado'
+    - La lógica del modelo crea movimientos de inventario de salida
+    - Captura errores de stock insuficiente
+    """
     from django.shortcuts import redirect
     pedido = PedidoVenta.objects.get(pk=pk)
     if request.method == 'POST':
@@ -119,3 +141,14 @@ def pedido_venta_completar(request, pk: int):
             messages.error(request, f'No se pudo completar: {e}')
         return redirect('pedido_venta_detail', pk=pedido.pk)
     return redirect('pedido_venta_detail', pk=pedido.pk)
+"""
+Vistas del módulo de ventas.
+
+- Listado y detalle de pedidos de venta (CBV)
+- Crear/editar pedidos con formset de ítems
+- Completar pedido (genera movimientos de inventario vía la lógica del modelo)
+
+Permisos:
+- Crear: ventas.add_pedidoventa
+- Editar/Completar: ventas.change_pedidoventa
+"""

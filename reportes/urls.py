@@ -1,3 +1,8 @@
+"""Rutas de Reportes.
+
+- HTML y exportación CSV para ventas, compras e inventario
+"""
+
 from django.urls import path
 from . import views
 
@@ -9,4 +14,3 @@ urlpatterns = [
     path('compras.csv', views.reporte_compras_csv, name='reporte_compras_csv'),
     path('inventario.csv', views.reporte_inventario_csv, name='reporte_inventario_csv'),
 ]
-
