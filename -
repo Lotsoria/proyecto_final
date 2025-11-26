@@ -1,6 +1,6 @@
 ﻿param(
   [string]$User = "root",
-  [string]$Password = "Shadowdemon456.",
+  [string]$Password = "Test123#",
   [string]$Host = "localhost",
   [int]$Port = 3306
 )

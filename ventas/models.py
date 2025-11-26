@@ -10,7 +10,6 @@ Reglas de negocio principales:
   (esto descuenta stock mediante la lógica de MovimientoInventario)
 """
 
-import re
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import models, transaction

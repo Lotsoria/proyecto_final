@@ -61,7 +61,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'erp',
         'USER': 'root',
-        'PASSWORD': 'Shadowdemon456.',
+        'PASSWORD': 'Test123#',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
